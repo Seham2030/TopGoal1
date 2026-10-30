@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Goal 1 - المنصة التعليمية</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Cairo & Fredoka) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti for Celebration Effects -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pastelPurple: {
+                            100: '#F3E8FF',
+                            200: '#E9D5FF',
+                            300: '#D8B4FE',
+                            500: '#A855F7',
+                            600: '#9333EA',
+                            700: '#7E22CE',
+                        },
+                        pastelGreen: {
+                            100: '#ECFDF5',
+                            200: '#D1FAE5',
+                            300: '#A7F3D0',
+                            400: '#86EFAC',
+                            500: '#4ADE80',
+                            600: '#16A34A',
+                        },
+                        pastelPink: {
+                            100: '#FDF2F8',
+                            200: '#FCE7F3',
+                            300: '#FBCFE8',
+                            400: '#F472B6',
+                            500: '#EC4899',
+                        },
+                        pastelYellow: '#FEF08A'
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        fredoka: ['Fredoka', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #FAF5FF;
+            color: #4C1D95;
+            user-select: none;
+        }
+
+        /* Fixed 3D Card Flip Mechanism */
+        .perspective-container {
+            perspective: 1000px;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+        .flashcard-inner.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1.5rem;
+            top: 0;
+            left: 0;
+        }
+        .flashcard-back {
+            transform: rotateY(180deg);
+        }
+
+        .bounce-hover:hover {
+            transform: translateY(-5px) scale(1.02);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Drop Zone Highlight */
+        .drag-over {
+            border-color: #A855F7 !important;
+            background-color: #F3E8FF !important;
+        }
+
+        /* Interactive Word Slot & Chip Styles for LTR Reorder */
+        .reorder-zone-ltr {
+            direction: ltr !important;
+            text-align: left !important;
+        }
+        
+        .word-chip {
+            cursor: grab;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            user-select: none;
+        }
+        .word-chip:active {
+            cursor: grabbing;
+        }
+        .word-chip:hover {
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F3E8FF;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #D8B4FE;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden bg-gradient-to-b from-purple-50 via-pink-50 to-green-50">
+
+    <!-- Header Section -->
+    <header class="w-full bg-white/90 backdrop-blur-md shadow-lg border-b-4 border-pastelPurple-300 sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3 space-x-reverse cursor-pointer" onclick="showSection('main-nav')">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-pastelPurple-500 via-pastelPink-400 to-pastelGreen-400 flex items-center justify-center text-white text-2xl shadow-md transform rotate-3">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black text-pastelPurple-700 tracking-wide font-fredoka">Top Goal 1</h1>
+                    <p class="text-xs text-pastelGreen-600 font-bold">رحلتنا الممتعة في تعلم الإنجليزية ✨</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button onclick="showSection('main-nav')" class="px-4 py-2 bg-pastelPurple-100 hover:bg-pastelPurple-200 text-pastelPurple-700 rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-house"></i>
+                    <span class="hidden sm:inline">الرئيسية</span>
+                </button>
+                <button onclick="openTeacherAuth()" class="px-4 py-2 bg-gradient-to-r from-pastelPink-400 to-pastelPurple-500 hover:from-pastelPink-500 hover:to-pastelPurple-600 text-white font-bold rounded-xl text-sm transition shadow-md flex items-center gap-2 bounce-hover border border-pastelPink-300">
+                    <i class="fa-solid fa-user-tie"></i>
+                    <span>صفحة المعلمة</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-5xl mx-auto px-4 py-8 flex-grow w-full">
+
+        <!-- Main Navigation Section -->
+        <section id="main-nav" class="space-y-8 animate-fade-in">
+            <!-- Welcome Banner -->
+            <div class="bg-gradient-to-r from-pastelPurple-300 via-pastelPink-200 to-pastelGreen-200 rounded-3xl p-6 md:p-8 shadow-xl text-center relative overflow-hidden border-4 border-white">
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/30 rounded-full blur-xl"></div>
+                <div class="absolute -left-10 -top-10 w-40 h-40 bg-pastelGreen-300/30 rounded-full blur-xl"></div>
+                <span class="inline-block px-4 py-1.5 bg-white/90 rounded-full text-xs md:text-sm font-extrabold text-pastelPurple-700 mb-2 shadow-sm">
+                    🌸 أهلاً بكِ يا بطلة المنهج! 🌸
+                </span>
+                <h2 class="text-3xl md:text-4xl font-black text-purple-900 mb-2">اختر قسمًا للبدء في التعلم</h2>
+                <p class="text-purple-800 font-bold text-sm md:text-base">استكشفي المفردات، القواعد، والتدريبات بطريقة تفاعلية وممتعة!</p>
+            </div>
+
+            <!-- 3 Main Interactive Category Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                <!-- Vocabulary Card -->
+                <div onclick="showSection('vocab-section')" class="bg-white rounded-3xl p-6 shadow-lg hover:shadow-2xl border-4 border-pastelPurple-200 hover:border-pastelPurple-400 cursor-pointer bounce-hover transition-all flex flex-col items-center text-center group">
+                    <div class="w-24 h-24 rounded-full bg-pastelPurple-100 flex items-center justify-center text-pastelPurple-600 text-4xl mb-4 group-hover:scale-110 transition-transform shadow-inner">
+                        <i class="fa-solid fa-language"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-purple-900 mb-1">كلمات المنهج</h3>
+                    <p class="text-xs text-pastelPurple-600 font-fredoka uppercase tracking-wider mb-3">Vocabulary</p>
+                    <p class="text-xs text-gray-600 font-bold leading-relaxed">بطاقات تفاعلية مصورة للكلمات مع خيار الاستماع للنطق، الترجمة، والأمثلة عند قلب البطاقة.</p>
+                    <div class="mt-6 px-5 py-2 bg-pastelPurple-500 text-white font-bold rounded-2xl text-sm shadow-md group-hover:bg-pastelPurple-600 transition">
+                        ابدأ التصفح <i class="fa-solid fa-arrow-left mr-1"></i>
+                    </div>
+                </div>
+
+                <!-- Grammar Card -->
+                <div onclick="showSection('grammar-section')" class="bg-white rounded-3xl p-6 shadow-lg hover:shadow-2xl border-4 border-pastelGreen-200 hover:border-pastelGreen-400 cursor-pointer bounce-hover transition-all flex flex-col items-center text-center group">
+                    <div class="w-24 h-24 rounded-full bg-pastelGreen-100 flex items-center justify-center text-pastelGreen-600 text-4xl mb-4 group-hover:scale-110 transition-transform shadow-inner">
+                        <i class="fa-solid fa-book-open-reader"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-purple-900 mb-1">قواعد المنهج</h3>
+                    <p class="text-xs text-pastelGreen-600 font-fredoka uppercase tracking-wider mb-3">Grammar</p>
+                    <p class="text-xs text-gray-600 font-bold leading-relaxed">شرح مبسّط بالصور أو الفيديوهات مع أسئلة تطبيقية تفاعلية بحد 6 أسئلة لكل قاعدة.</p>
+                    <div class="mt-6 px-5 py-2 bg-pastelGreen-500 text-purple-900 font-extrabold rounded-2xl text-sm shadow-md group-hover:bg-pastelGreen-400 transition">
+                        استكشف القواعد <i class="fa-solid fa-arrow-left mr-1"></i>
+                    </div>
+                </div>
+
+                <!-- Drills Card -->
+                <div onclick="showSection('drills-section')" class="bg-white rounded-3xl p-6 shadow-lg hover:shadow-2xl border-4 border-pastelPink-200 hover:border-pastelPink-400 cursor-pointer bounce-hover transition-all flex flex-col items-center text-center group">
+                    <div class="w-24 h-24 rounded-full bg-pastelPink-100 flex items-center justify-center text-pastelPink-500 text-4xl mb-4 group-hover:scale-110 transition-transform shadow-inner">
+                        <i class="fa-solid fa-gamepad"></i>
+                    </div>
+                    <h3 class="text-2xl font-black text-purple-900 mb-1">تدريبات</h3>
+                    <p class="text-xs text-pastelPink-500 font-fredoka uppercase tracking-wider mb-3">Drills & Quizzes</p>
+                    <p class="text-xs text-gray-600 font-bold leading-relaxed">أسئلة اختيار من متعدد مقسمة حسب 5 أقسام، مع تعزيزات وتشجيع فوري!</p>
+                    <div class="mt-6 px-5 py-2 bg-pastelPink-400 text-white font-bold rounded-2xl text-sm shadow-md group-hover:bg-pastelPink-500 transition">
+                        انطلق للتمارين <i class="fa-solid fa-arrow-left mr-1"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1: Vocabulary (Flashcards) -->
+        <section id="vocab-section" class="hidden space-y-6">
+            <div class="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-pastelPurple-200">
+                <button onclick="showSection('main-nav')" class="text-pastelPurple-700 font-bold flex items-center gap-2 hover:underline text-sm">
+                    <i class="fa-solid fa-chevron-right"></i> العودة للرئيسية
+                </button>
+                <h2 class="text-2xl font-black text-purple-900 flex items-center gap-2">
+                    <i class="fa-solid fa-language text-pastelPurple-500"></i> كلمات المنهج (Vocabulary)
+                </h2>
+                <div class="text-sm font-extrabold text-pastelPurple-600" id="vocab-counter">1 / 1</div>
+            </div>
+
+            <!-- Flashcard Display Container -->
+            <div class="max-w-md mx-auto">
+                <div class="perspective-container h-[430px] w-full cursor-pointer" onclick="toggleCardFlip()">
+                    <div id="flashcard-inner" class="flashcard-inner">
+                        
+                        <!-- Front Face -->
+                        <div class="flashcard-front p-6 bg-gradient-to-b from-white via-purple-50/50 to-purple-100/60 border-4 border-pastelPurple-300 shadow-2xl flex flex-col justify-between items-center text-center">
+                            <span class="self-end px-3 py-1 bg-pastelPurple-100 text-pastelPurple-700 font-bold text-xs rounded-full border border-pastelPurple-200">
+                                اضغط لقلب البطاقة 🔄
+                            </span>
+                            
+                            <div class="my-auto flex flex-col items-center">
+                                <div class="w-44 h-44 rounded-2xl border-4 border-white shadow-md overflow-hidden bg-white mb-4">
+                                    <img id="vocab-img" src="" alt="Word Illustration" class="w-full h-full object-cover">
+                                </div>
+                                <h3 id="vocab-word" class="text-3xl font-black text-purple-900 font-fredoka tracking-wide">Word</h3>
+                            </div>
+
+                            <button onclick="event.stopPropagation(); speakWord()" class="w-full py-3 bg-pastelPurple-500 hover:bg-pastelPurple-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-md transition text-sm">
+                                <i class="fa-solid fa-volume-high text-lg"></i> استمع للنطق (Listen)
+                            </button>
+                        </div>
+
+                        <!-- Back Face -->
+                        <div class="flashcard-back p-6 bg-gradient-to-b from-pastelGreen-100 via-white to-pastelGreen-50 border-4 border-pastelGreen-300 shadow-2xl flex flex-col justify-between items-center text-center">
+                            <span class="self-end px-3 py-1 bg-pastelGreen-200 text-pastelGreen-800 font-bold text-xs rounded-full border border-pastelGreen-300">
+                                الترجمة والمثال 📝
+                            </span>
+
+                            <div class="my-auto w-full flex flex-col items-center space-y-3">
+                                <span class="text-xs font-bold text-gray-500">الترجمة بالعربية:</span>
+                                <h4 id="vocab-arabic" class="text-3xl font-black text-green-800">الترجمة</h4>
+                                <div class="w-16 h-1 bg-pastelGreen-400 rounded-full my-1"></div>
+                                <span class="text-xs font-bold text-purple-600">مثال / Example:</span>
+                                <p id="vocab-example" class="text-base font-bold text-purple-900 font-fredoka bg-white p-4 rounded-xl border-2 border-pastelGreen-300 w-full shadow-inner leading-relaxed">
+                                    Example sentence goes here.
+                                </p>
+                            </div>
+
+                            <button onclick="event.stopPropagation(); speakSentence()" class="w-full py-3 bg-pastelGreen-500 hover:bg-pastelGreen-600 text-purple-950 font-black rounded-xl flex items-center justify-center gap-2 shadow-md transition text-sm">
+                                <i class="fa-solid fa-volume-high text-lg"></i> استمع للمثال
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="flex justify-between items-center mt-6">
+                    <button onclick="prevVocab()" class="px-5 py-3 bg-white border-2 border-pastelPurple-300 hover:bg-pastelPurple-100 text-pastelPurple-700 font-bold rounded-2xl shadow transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right"></i> السابقة
+                    </button>
+                    <button onclick="nextVocab()" class="px-5 py-3 bg-pastelPurple-500 hover:bg-pastelPurple-600 text-white font-bold rounded-2xl shadow-lg transition flex items-center gap-2">
+                        التالية <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Grammar Section -->
+        <section id="grammar-section" class="hidden space-y-6">
+            <div class="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-pastelGreen-200">
+                <button onclick="showSection('main-nav')" class="text-pastelPurple-700 font-bold flex items-center gap-2 hover:underline text-sm">
+                    <i class="fa-solid fa-chevron-right"></i> العودة للرئيسية
+                </button>
+                <h2 class="text-2xl font-black text-purple-900 flex items-center gap-2">
+                    <i class="fa-solid fa-book-open-reader text-pastelGreen-500"></i> قواعد المنهج (Grammar)
+                </h2>
+                <div class="text-sm font-extrabold text-pastelGreen-600" id="grammar-page-indicator">قاعدة 1 من 6</div>
+            </div>
+
+            <!-- Rule Display Container -->
+            <div class="bg-white rounded-3xl p-6 md:p-8 shadow-xl border-4 border-pastelGreen-200 space-y-6">
+                <!-- Grammar Title & Explanation -->
+                <div class="border-b border-gray-100 pb-4">
+                    <span id="grammar-badge" class="px-3 py-1 bg-pastelGreen-100 text-pastelGreen-800 font-extrabold text-xs rounded-full">القاعدة رقم 1</span>
+                    <h3 id="grammar-title" class="text-2xl font-black text-purple-900 mt-2 font-fredoka">Grammar Rule Title</h3>
+                    <p id="grammar-desc" class="text-sm md:text-base font-bold text-gray-700 mt-2 leading-relaxed">شرح القاعدة بالتفصيل هنا...</p>
+                </div>
+
+                <!-- Media Content (Image or Video) -->
+                <div id="grammar-media-container" class="rounded-2xl overflow-hidden bg-purple-50 border-2 border-pastelGreen-200 flex items-center justify-center max-h-80 shadow-inner">
+                    <!-- Media dynamically injected -->
+                </div>
+
+                <!-- Practice Questions (Up to 6 questions) -->
+                <div class="space-y-4 pt-2">
+                    <h4 class="text-lg font-black text-purple-900 flex items-center gap-2">
+                        <i class="fa-solid fa-pen-to-square text-pastelPurple-500"></i> أسئلة تطبيقية على القاعدة:
+                    </h4>
+                    <div id="grammar-questions-list" class="space-y-4">
+                        <!-- Questions dynamically loaded -->
+                    </div>
+                </div>
+
+                <!-- Footer Navigation for Rules -->
+                <div class="flex justify-between items-center pt-4 border-t border-gray-100">
+                    <button id="btn-prev-grammar" onclick="prevGrammar()" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-right"></i> القاعدة السابقة
+                    </button>
+                    <button id="btn-next-grammar" onclick="nextGrammar()" class="px-6 py-2.5 bg-pastelGreen-500 hover:bg-pastelGreen-600 text-purple-950 font-black rounded-xl shadow transition flex items-center gap-2">
+                        القاعدة التالية <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Drills (Interactive Quizzes) -->
+        <section id="drills-section" class="hidden space-y-6">
+            <div class="flex items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-pastelPink-200">
+                <button onclick="showSection('main-nav')" class="text-pastelPurple-700 font-bold flex items-center gap-2 hover:underline text-sm">
+                    <i class="fa-solid fa-chevron-right"></i> العودة للرئيسية
+                </button>
+                <h2 class="text-2xl font-black text-purple-900 flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-pastelPink-500"></i> تدريبات المنهج (Drills)
+                </h2>
+                <div></div>
+            </div>
+
+            <!-- 5 Unit Navigation Tabs -->
+            <div class="flex flex-wrap justify-center gap-2 md:gap-3">
+                <button onclick="loadUnitDrills('welcome')" id="tab-welcome" class="unit-tab px-5 py-3 rounded-2xl font-black text-sm md:text-base shadow transition border-2 border-transparent">
+                    🌟 Welcome
+                </button>
+                <button onclick="loadUnitDrills('u1')" id="tab-u1" class="unit-tab px-5 py-3 rounded-2xl font-black text-sm md:text-base shadow transition border-2 border-transparent">
+                    Unit 1
+                </button>
+                <button onclick="loadUnitDrills('u2')" id="tab-u2" class="unit-tab px-5 py-3 rounded-2xl font-black text-sm md:text-base shadow transition border-2 border-transparent">
+                    Unit 2
+                </button>
+                <button onclick="loadUnitDrills('u3')" id="tab-u3" class="unit-tab px-5 py-3 rounded-2xl font-black text-sm md:text-base shadow transition border-2 border-transparent">
+                    Unit 3
+                </button>
+                <button onclick="loadUnitDrills('u4')" id="tab-u4" class="unit-tab px-5 py-3 rounded-2xl font-black text-sm md:text-base shadow transition border-2 border-transparent">
+                    Unit 4
+                </button>
+            </div>
+
+            <!-- Motivational Bilingual Message Header -->
+            <div id="motivational-banner" class="bg-gradient-to-r from-pastelPurple-200 via-pastelPink-200 to-pastelGreen-200 p-4 rounded-2xl text-center shadow-inner border-2 border-white">
+                <p class="font-black text-purple-950 text-lg md:text-xl" id="motto-ar">أنتِ مبدعة وذكية! واصلي التميز ✨</p>
+                <p class="text-xs md:text-sm text-purple-800 font-fredoka uppercase tracking-wider font-extrabold mt-0.5" id="motto-en">You are brilliant! Keep shining ⭐</p>
+            </div>
+
+            <!-- Questions Container for Selected Unit -->
+            <div id="drills-questions-container" class="space-y-6">
+                <!-- Drill items dynamically loaded -->
+            </div>
+        </section>
+
+        <!-- Teacher Dashboard Password Modal -->
+        <div id="teacher-auth-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl p-6 md:p-8 max-w-sm w-full shadow-2xl border-4 border-pastelPurple-300 text-center">
+                <div class="w-16 h-16 bg-pastelPurple-100 rounded-full flex items-center justify-center mx-auto mb-4 text-pastelPurple-600 text-2xl">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h3 class="text-2xl font-black text-purple-900 mb-1">دخول المعلمة</h3>
+                <p class="text-xs font-bold text-gray-500 mb-4">أ. سهام الشهري - يرجى إدخال الرقم السري</p>
+                <input type="password" id="teacher-pin" placeholder="••••••" maxlength="6" class="w-full text-center text-2xl font-black tracking-widest py-3 border-2 border-pastelPurple-200 rounded-xl focus:outline-none focus:border-pastelPurple-500 mb-4">
+                <div id="pin-error" class="text-xs font-bold text-red-500 hidden mb-3">الرمز السري غير صحيح! حاول مرة أخرى.</div>
+                <div class="flex gap-2">
+                    <button onclick="closeTeacherAuth()" class="w-1/2 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition">إلغاء</button>
+                    <button onclick="verifyTeacherPin()" class="w-1/2 py-2.5 bg-pastelPurple-500 hover:bg-pastelPurple-600 text-white font-bold rounded-xl transition shadow">دخول</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teacher Control Panel Section -->
+        <section id="teacher-dashboard" class="hidden space-y-6">
+            <div class="flex flex-wrap items-center justify-between bg-white p-4 rounded-2xl shadow-md border-2 border-pastelPurple-400 gap-2">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-pastelGreen-300 rounded-xl flex items-center justify-center text-purple-950 font-bold text-xl">
+                        <i class="fa-solid fa-user-gear"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-black text-purple-900">لوحة تحكم المعلمة: أ. سهام الشهري</h2>
+                        <p class="text-xs text-green-700 font-bold">إدارة المحتوى وتعديله وسحب وإرفاق الصور بسهولة</p>
+                    </div>
+                </div>
+                <button onclick="showSection('main-nav')" class="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 text-sm font-bold rounded-xl transition flex items-center gap-1">
+                    <i class="fa-solid fa-right-from-bracket"></i> خروج
+                </button>
+            </div>
+
+            <!-- Dashboard Tabs -->
+            <div class="flex rounded-2xl bg-white p-1.5 shadow-sm border border-gray-200 gap-1 overflow-x-auto">
+                <button onclick="switchTeacherTab('dash-vocab')" id="tab-dash-vocab" class="dash-tab flex-1 py-2.5 px-4 rounded-xl font-bold text-sm whitespace-nowrap transition">
+                    <i class="fa-solid fa-language"></i> إدارة الكلمات
+                </button>
+                <button onclick="switchTeacherTab('dash-grammar')" id="tab-dash-grammar" class="dash-tab flex-1 py-2.5 px-4 rounded-xl font-bold text-sm whitespace-nowrap transition">
+                    <i class="fa-solid fa-book-open-reader"></i> إدارة القواعد
+                </button>
+                <button onclick="switchTeacherTab('dash-drills')" id="tab-dash-drills" class="dash-tab flex-1 py-2.5 px-4 rounded-xl font-bold text-sm whitespace-nowrap transition">
+                    <i class="fa-solid fa-gamepad"></i> إدارة الأسئلة والتدريبات
+                </button>
+            </div>
+
+            <!-- Sub-Tab 1: Manage Vocabulary -->
+            <div id="dash-vocab" class="dash-content space-y-6 bg-white p-6 rounded-3xl shadow-lg border border-pastelPurple-200">
+                <h3 class="text-lg font-black text-purple-900 border-b pb-2">إضافة / تعديل كلمة في المنهج</h3>
+                
+                <form id="vocab-form" onsubmit="saveVocab(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="hidden" id="vocab-id">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">الكلمة بالإنجليزية (English Word)</label>
+                        <input type="text" id="vocab-input-word" required class="w-full p-2.5 border rounded-xl text-sm font-bold focus:ring-2 focus:ring-pastelPurple-400">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">الترجمة بالعربية</label>
+                        <input type="text" id="vocab-input-arabic" required class="w-full p-2.5 border rounded-xl text-sm font-bold focus:ring-2 focus:ring-pastelPurple-400">
+                    </div>
+                    
+                    <!-- Drag & Drop / File Upload Box -->
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-gray-700 mb-1">صورة الكلمة (سحب وإفلات أو اختر من الجهاز)</label>
+                        <div id="drop-zone" onclick="document.getElementById('vocab-file-input').click()" class="border-2 border-dashed border-pastelPurple-300 bg-purple-50/50 hover:bg-purple-100/50 p-4 rounded-2xl text-center cursor-pointer transition">
+                            <i class="fa-solid fa-cloud-arrow-up text-3xl text-pastelPurple-500 mb-2"></i>
+                            <p class="text-xs font-bold text-purple-900">اضغطي هنا لاختيار صورة من جهازكِ أو اسحبي الصورة إلى هنا</p>
+                            <input type="file" id="vocab-file-input" accept="image/*" onchange="handleImageUpload(event)" class="hidden">
+                            <input type="hidden" id="vocab-input-img">
+                        </div>
+                        <div id="img-preview-box" class="hidden flex items-center gap-3 mt-3 bg-purple-100/60 p-2 rounded-xl border border-pastelPurple-300">
+                            <img id="img-preview" src="" class="w-12 h-12 object-cover rounded-lg border-2 border-white shadow-sm">
+                            <span class="text-xs text-green-700 font-extrabold">تم إرفاق الصورة بنجاح! ✨</span>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-gray-700 mb-1">جملة مثال (Example Sentence)</label>
+                        <input type="text" id="vocab-input-example" required class="w-full p-2.5 border rounded-xl text-sm font-bold focus:ring-2 focus:ring-pastelPurple-400">
+                    </div>
+                    <div class="md:col-span-2 flex gap-2">
+                        <button type="submit" class="px-6 py-2.5 bg-pastelPurple-500 hover:bg-pastelPurple-600 text-white font-bold rounded-xl text-sm shadow">حفظ الكلمة</button>
+                        <button type="button" onclick="resetVocabForm()" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-sm">إلغاء</button>
+                    </div>
+                </form>
+
+                <div class="mt-6">
+                    <h4 class="font-bold text-sm text-purple-900 mb-3">قائمة الكلمات الحالية:</h4>
+                    <div id="vocab-manager-list" class="space-y-2 max-h-80 overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+
+            <!-- Sub-Tab 2: Manage Grammar -->
+            <div id="dash-grammar" class="dash-content hidden space-y-6 bg-white p-6 rounded-3xl shadow-lg border border-pastelGreen-200">
+                <h3 class="text-lg font-black text-purple-900 border-b pb-2">تعديل القواعد الـ 6 للمنهج</h3>
+                <div class="flex gap-2 overflow-x-auto pb-2" id="grammar-select-buttons">
+                    <!-- Rule selector buttons -->
+                </div>
+
+                <form id="grammar-form" onsubmit="saveGrammar(event)" class="space-y-4">
+                    <input type="hidden" id="grammar-edit-index">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">عنوان القاعدة (Rule Title)</label>
+                        <input type="text" id="grammar-input-title" required class="w-full p-2.5 border rounded-xl text-sm font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">شرح القاعدة</label>
+                        <textarea id="grammar-input-desc" rows="2" required class="w-full p-2.5 border rounded-xl text-sm font-bold"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">نوع الوسائط</label>
+                        <select id="grammar-input-type" onchange="toggleGrammarMediaType()" class="w-full p-2.5 border rounded-xl text-sm font-bold">
+                            <option value="image">صورة (Image)</option>
+                            <option value="video">فيديو (Video File or YouTube Link)</option>
+                        </select>
+                    </div>
+
+                    <!-- Grammar Drag & Drop / File Upload Box -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700 mb-1">ملف القاعدة (سحب وإفلات صورة/فيديو أو اختر من الجهاز)</label>
+                        <div id="grammar-drop-zone" onclick="document.getElementById('grammar-file-input').click()" class="border-2 border-dashed border-pastelGreen-400 bg-green-50/50 hover:bg-green-100/50 p-4 rounded-2xl text-center cursor-pointer transition">
+                            <i class="fa-solid fa-cloud-arrow-up text-3xl text-pastelGreen-600 mb-2"></i>
+                            <p class="text-xs font-bold text-purple-900">اضغطي هنا لاختيار صورة/فيديو من جهازكِ أو اسحبي الملف إلى هنا</p>
+                            <input type="file" id="grammar-file-input" accept="image/*,video/*" onchange="handleGrammarMediaUpload(event)" class="hidden">
+                            <input type="hidden" id="grammar-input-media">
+                        </div>
+                        <div class="mt-2">
+                            <input type="text" id="grammar-input-media-url-fallback" placeholder="أو ضعي رابط الصورة/الفيديو (YouTube Embed / Direct URL)" class="w-full p-2 border rounded-xl text-xs font-bold text-gray-600" onchange="document.getElementById('grammar-input-media').value = this.value">
+                        </div>
+                        <div id="grammar-media-preview-box" class="hidden flex items-center gap-3 mt-3 bg-pastelGreen-100/60 p-2 rounded-xl border border-pastelGreen-300">
+                            <span id="grammar-media-preview-indicator" class="text-xs text-green-800 font-extrabold">تم إرفاق الوسائط بنجاح! ✨</span>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Interactive Questions Editor for Grammar Rule -->
+                    <div class="border-t pt-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="font-bold text-sm text-purple-900">أسئلة تطبيقية على القاعدة (بحد أقصى 6 أسئلة)</h4>
+                            <button type="button" onclick="addGrammarQuestionField()" class="px-3 py-1.5 bg-pastelGreen-500 text-purple-950 text-xs font-extrabold rounded-xl hover:bg-pastelGreen-400 shadow">
+                                + إضافة سؤال جديد
+                            </button>
+                        </div>
+                        <div id="grammar-questions-manager" class="space-y-4"></div>
+                    </div>
+
+                    <button type="submit" class="px-6 py-2.5 bg-pastelGreen-500 hover:bg-pastelGreen-600 text-purple-950 font-black rounded-xl text-sm shadow">حفظ القاعدة والأسئلة</button>
+                </form>
+            </div>
+
+            <!-- Sub-Tab 3: Manage Drills -->
+            <div id="dash-drills" class="dash-content hidden space-y-6 bg-white p-6 rounded-3xl shadow-lg border border-pastelPink-200">
+                <h3 class="text-lg font-black text-purple-900 border-b pb-2">إدارة أسئلة التدريبات (Drills)</h3>
+                <div class="flex gap-2 mb-4">
+                    <label class="text-xs font-bold text-gray-700 self-center">اختر وحدة للتعديل عليها:</label>
+                    <select id="drill-unit-select" onchange="renderDrillManager()" class="p-2 border rounded-xl text-sm font-bold text-purple-900">
+                        <option value="welcome">Welcome</option>
+                        <option value="u1">Unit 1</option>
+                        <option value="u2">Unit 2</option>
+                        <option value="u3">Unit 3</option>
+                        <option value="u4">Unit 4</option>
+                    </select>
+                </div>
+
+                <form id="drill-form" onsubmit="saveDrillQuestion(event)" class="space-y-4 bg-pink-50/50 p-4 rounded-2xl border border-pink-100">
+                    <input type="hidden" id="drill-edit-id">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">نوع السؤال</label>
+                            <select id="drill-type-select" onchange="toggleDrillTypeFields()" class="w-full p-2.5 border rounded-xl text-sm font-bold text-purple-900">
+                                <option value="mcq">اختيار من متعدد (3 خيارات)</option>
+                                <option value="tf">صح أو خطأ (T or F)</option>
+                                <option value="reorder">ترتيب الجملة (Sentence Reorder)</option>
+                                <option value="missing">إكمال الحرف الناقص (Missing Letter)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">نص السؤال / الجملة</label>
+                            <input type="text" id="drill-input-q" required placeholder="مثال: Choose the correct word" class="w-full p-2.5 border rounded-xl text-sm font-bold">
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Fields based on Question Type -->
+                    <div id="field-group-mcq" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">الخيار 1</label>
+                            <input type="text" id="drill-input-opt1" class="w-full p-2.5 border rounded-xl text-sm font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">الخيار 2</label>
+                            <input type="text" id="drill-input-opt2" class="w-full p-2.5 border rounded-xl text-sm font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">الخيار 3</label>
+                            <input type="text" id="drill-input-opt3" class="w-full p-2.5 border rounded-xl text-sm font-bold">
+                        </div>
+                    </div>
+
+                    <div id="field-group-correct-mcq">
+                        <label class="block text-xs font-bold text-gray-700 mb-1">الخيار الصحيح</label>
+                        <select id="drill-input-correct" class="w-full p-2.5 border rounded-xl text-sm font-black text-green-700">
+                            <option value="0">الخيار 1</option>
+                            <option value="1">الخيار 2</option>
+                            <option value="2">الخيار 3</option>
+                        </select>
+                    </div>
+
+                    <div id="field-group-tf" class="hidden">
+                        <label class="block text-xs font-bold text-gray-700 mb-1">الإجابة الصحيحة</label>
+                        <select id="drill-input-tf-correct" class="w-full p-2.5 border rounded-xl text-sm font-black text-green-700">
+                            <option value="True">True (صح)</option>
+                            <option value="False">False (خطأ)</option>
+                        </select>
+                    </div>
+
+                    <div id="field-group-reorder" class="hidden space-y-2">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">الجملة بالترتيب الصحيح (افصلي بين الكلمات بمسافة)</label>
+                            <input type="text" id="drill-input-reorder-correct" placeholder="مثال: She is a good student" class="w-full p-2.5 border rounded-xl text-sm font-bold">
+                        </div>
+                    </div>
+
+                    <div id="field-group-missing" class="hidden space-y-2">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">الكلمة كاملة (مثال: School)</label>
+                                <input type="text" id="drill-input-missing-word" placeholder="School" class="w-full p-2.5 border rounded-xl text-sm font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">الحرف الناقص (مثال: c)</label>
+                                <input type="text" id="drill-input-missing-letter" placeholder="c" maxlength="1" class="w-full p-2.5 border rounded-xl text-sm font-bold">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 mb-1">خيارات الحروف المتاحة (افصلي بينها بفاصلة مثل: c, k, s)</label>
+                            <input type="text" id="drill-input-missing-opts" placeholder="c, k, s" class="w-full p-2.5 border rounded-xl text-sm font-bold">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 pt-2">
+                        <button type="submit" class="px-6 py-2 bg-pastelPink-500 hover:bg-pastelPink-600 text-white font-bold rounded-xl text-sm shadow">حفظ السؤال</button>
+                        <button type="button" onclick="resetDrillForm()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-sm">إلغاء</button>
+                    </div>
+                </form>
+
+                <div class="mt-6">
+                    <h4 class="font-bold text-sm text-purple-900 mb-3">أسئلة الوحدة الحالية:</h4>
+                    <div id="drills-manager-list" class="space-y-3"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="bg-white border-t border-purple-100 py-4 text-center mt-auto shadow-inner">
+        <p class="text-xs md:text-sm font-bold text-purple-800">
+            الحقوق محفوظة ©️ مدرسة عمرة بنت الربيع | أ.سهام الشهري
+        </p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Data Storage & Initial Values
+        let vocabData = JSON.parse(localStorage.getItem('topgoal_vocab')) || [
+            { id: 1, word: "Hello", arabic: "مرحباً", img: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=400&q=80", example: "Hello! How are you?" },
+            { id: 2, word: "Apple", arabic: "تفاحة", img: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=400&q=80", example: "I like to eat a red apple." },
+            { id: 3, word: "Book", arabic: "كتاب", img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80", example: "Open your English book." },
+            { id: 4, word: "School", arabic: "مدرسة", img: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=400&q=80", example: "Our school is very beautiful." }
+        ];
+
+        let grammarData = JSON.parse(localStorage.getItem('topgoal_grammar')) || [
+            {
+                title: "Rule 1: Subject Pronouns (ضمائر الفاعل)",
+                desc: "نستخدم الضمائر للتعويض عن الأسماء: I (أنا), He (هو للمذكر), She (هي للمؤنث), It (لغير العاقل).",
+                mediaType: "image",
+                mediaUrl: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=600&q=80",
+                questions: [
+                    { type: 'mcq', q: "___ is a clever girl.", opts: ["He", "She", "It"], ans: 1 },
+                    { type: 'tf', q: "'She' is used for a boy.", correctTF: "False" },
+                    { type: 'reorder', q: "رتب الجملة التالية:", correctSentence: "She is a clever girl" }
+                ]
+            },
+            {
+                title: "Rule 2: Verb to Be (Verb Be)",
+                desc: "يأتي الفعل Be بمعنى (يكون): (I am), (He/She/It is), (They/We/You are).",
+                mediaType: "image",
+                mediaUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=600&q=80",
+                questions: [
+                    { type: 'mcq', q: "She ___ my friend.", opts: ["am", "is", "are"], ans: 1 },
+                    { type: 'missing', q: "أكمل الحرف الناقص:", word: "Friend", letter: "i", letterOpts: ["i", "e", "a"] }
+                ]
+            },
+            {
+                title: "Rule 3: Possessive Adjectives (صفات الملكية)",
+                desc: "My (لي/خاصتي), Your (لك/خاصتك), Her (لها), His (له).",
+                mediaType: "image",
+                mediaUrl: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80",
+                questions: [
+                    { type: 'mcq', q: "This is ___ bag. (حقيبتي)", opts: ["my", "his", "her"], ans: 0 }
+                ]
+            },
+            {
+                title: "Rule 4: Plural Nouns (الجمع إضافة s)",
+                desc: "نضيف حرف (s) لنهاية الاسم المفرد لتحويله إلى جمع: Book -> Books, Apple -> Apples.",
+                mediaType: "image",
+                mediaUrl: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=600&q=80",
+                questions: [
+                    { type: 'mcq', q: "One pen, two ___.", opts: ["pen", "pens", "penes"], ans: 1 }
+                ]
+            },
+            {
+                title: "Rule 5: Can and Can't (الاستطاعة)",
+                desc: "نستخدم Can للتعبير عن القدرة و Can't للتعبير عن عدم القدرة على فعل شيء.",
+                mediaType: "image",
+                mediaUrl: "https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=600&q=80",
+                questions: [
+                    { type: 'mcq', q: "A bird ___ fly high.", opts: ["can", "can't", "is"], ans: 0 }
+                ]
+            },
+            {
+                title: "Rule 6: Present Simple (المضارع البسيط)",
+                desc: "نضيف s للفعل إذا كان الفاعل (He, She, It): She likes apples.",
+                mediaType: "image",
+                mediaUrl: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=600&q=80",
+                questions: [
+                    { type: 'mcq', q: "He ___ ice cream.", opts: ["like", "likes", "liking"], ans: 1 }
+                ]
+            }
+        ];
+
+        let drillsData = JSON.parse(localStorage.getItem('topgoal_drills')) || {
+            welcome: [
+                { id: 101, type: 'mcq', q: "How are you?", opts: ["I am fine, thank you!", "Good night.", "Goodbye!"], ans: 0 },
+                { id: 102, type: 'reorder', q: "رتبي الكلمات لتكوين جملة:", correctSentence: "My name is Sara" },
+                { id: 103, type: 'tf', q: "The elephant is a small animal.", correctTF: "False" },
+                { id: 104, type: 'missing', q: "أكملي الحرف الناقص للكلمة (تفاحة):", word: "Apple", letter: "p", letterOpts: ["p", "b", "d"] }
+            ],
+            u1: [
+                { id: 201, type: 'mcq', q: "Choose the correct spelling:", opts: ["School", "Skool", "Schul"], ans: 0 },
+                { id: 202, type: 'missing', q: "أكملي الحرف الناقص في كلمة مدرسة:", word: "School", letter: "c", letterOpts: ["c", "k", "s"] }
+            ],
+            u2: [
+                { id: 301, type: 'mcq', q: "She ___ my friend.", opts: ["am", "is", "are"], ans: 1 },
+                { id: 302, type: 'tf', q: "'Big' is the opposite of 'Small'.", correctTF: "True" }
+            ],
+            u3: [
+                { id: 401, type: 'mcq', q: "Which one is an animal?", opts: ["Cat", "Chair", "Pencil"], ans: 0 },
+                { id: 402, type: 'reorder', q: "رتبي الكلمات التالية:", correctSentence: "I read books" }
+            ],
+            u4: [
+                { id: 501, type: 'mcq', q: "I ___ ice cream.", opts: ["like", "likes", "liking"], ans: 0 },
+                { id: 502, type: 'missing', q: "أكملي الحرف الناقص لكلمة أنف:", word: "Nose", letter: "s", letterOpts: ["s", "z", "c"] }
+            ]
+        };
+
+        const motivationalMessages = [
+            { ar: "أنتِ مبدعة وذكية! واصلي التميز ✨", en: "You are brilliant! Keep shining ⭐" },
+            { ar: "عمل ممتاز يا بطلة المنهج! 🌟", en: "Great work, superstar! 🌟" },
+            { ar: "إجابة رائعة، استمري في التقدم! 🎉", en: "Fantastic job, keep going forward! 🎉" },
+            { ar: "ذكاء وتفوق لا مثيل له! 💖", en: "Smart and outstanding performance! 💖" }
+        ];
+
+        // Global State
+        let currentVocabIndex = 0;
+        let currentGrammarIndex = 0;
+        let currentDrillUnit = 'welcome';
+        let userReorderSelections = {};
+
+        // Startup Handlers
+        window.addEventListener('DOMContentLoaded', () => {
+            renderVocabCard();
+            renderGrammarPage();
+            renderDrillTabs();
+            loadUnitDrills('welcome');
+            setupDragAndDrop();
+            setupGrammarDragAndDrop();
+        });
+
+        // Navigation Controller
+        function showSection(sectionId) {
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(sectionId).classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ================= Flashcards Logic =================
+        function toggleCardFlip() {
+            const card = document.getElementById('flashcard-inner');
+            card.classList.toggle('is-flipped');
+        }
+
+        function renderVocabCard() {
+            if (vocabData.length === 0) return;
+            const item = vocabData[currentVocabIndex];
+            
+            // Reset Flip Status
+            document.getElementById('flashcard-inner').classList.remove('is-flipped');
+            
+            document.getElementById('vocab-img').src = item.img;
+            document.getElementById('vocab-word').innerText = item.word;
+            document.getElementById('vocab-arabic').innerText = item.arabic;
+            document.getElementById('vocab-example').innerText = item.example;
+            document.getElementById('vocab-counter').innerText = `${currentVocabIndex + 1} / ${vocabData.length}`;
+        }
+
+        function nextVocab() {
+            currentVocabIndex = (currentVocabIndex + 1) % vocabData.length;
+            renderVocabCard();
+        }
+
+        function prevVocab() {
+            currentVocabIndex = (currentVocabIndex - 1 + vocabData.length) % vocabData.length;
+            renderVocabCard();
+        }
+
+        function speakWord() {
+            if ('speechSynthesis' in window) {
+                const word = vocabData[currentVocabIndex].word;
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.85;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Grammar Drag and Drop Upload Support
+        function setupGrammarDragAndDrop() {
+            const dropZone = document.getElementById('grammar-drop-zone');
+            if (!dropZone) return;
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('drag-over');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('drag-over');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files && files[0]) {
+                    processGrammarMediaFile(files[0]);
+                }
+            });
+        }
+
+        function handleGrammarMediaUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                processGrammarMediaFile(file);
+            }
+        }
+
+        function processGrammarMediaFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Data = e.target.result;
+                document.getElementById('grammar-input-media').value = base64Data;
+                document.getElementById('grammar-input-media-url-fallback').value = '';
+                document.getElementById('grammar-media-preview-box').classList.remove('hidden');
+                
+                if (file.type.startsWith('video/')) {
+                    document.getElementById('grammar-input-type').value = 'video';
+                } else {
+                    document.getElementById('grammar-input-type').value = 'image';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function toggleGrammarMediaType() {
+            const type = document.getElementById('grammar-input-type').value;
+            const fileInput = document.getElementById('grammar-file-input');
+            if (type === 'video') {
+                fileInput.accept = 'video/*';
+            } else {
+                fileInput.accept = 'image/*';
+            }
+        }
+
+        function speakSentence() {
+            if ('speechSynthesis' in window) {
+                const example = vocabData[currentVocabIndex].example;
+                const utterance = new SpeechSynthesisUtterance(example);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.85;
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Drag and Drop Upload Support
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('drop-zone');
+            if (!dropZone) return;
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('drag-over');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('drag-over');
+                }, false);
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files && files[0]) {
+                    processImageFile(files[0]);
+                }
+            });
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                processImageFile(file);
+            }
+        }
+
+        function processImageFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Img = e.target.result;
+                document.getElementById('vocab-input-img').value = base64Img;
+                document.getElementById('img-preview').src = base64Img;
+                document.getElementById('img-preview-box').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ================= Universal Question Renderer =================
+        function createQuestionElement(q, qIdx, scope) {
+            const wrapper = document.createElement('div');
+            wrapper.className = "bg-white p-5 rounded-3xl shadow-md border-2 border-purple-100 space-y-4 my-3";
+            const qType = q.type || 'mcq';
+
+            let bodyHTML = '';
+
+            if (qType === 'mcq') {
+                bodyHTML = `
+                    <p class="font-black text-purple-900 text-sm md:text-base">${qIdx + 1}. ${q.q}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        ${q.opts.map((opt, oIdx) => `
+                            <button onclick="checkAnswerMCQ(this, '${scope}', ${qIdx}, ${oIdx})" class="py-2.5 px-3 bg-purple-50 hover:bg-purple-100 text-purple-900 font-bold text-sm rounded-xl border border-purple-200 transition shadow-sm">
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (qType === 'tf') {
+                bodyHTML = `
+                    <p class="font-black text-purple-900 text-sm md:text-base">${qIdx + 1}. ${q.q}</p>
+                    <div class="flex gap-4 justify-center">
+                        <button onclick="checkAnswerTF(this, '${scope}', ${qIdx}, 'True')" class="px-8 py-2.5 bg-green-50 hover:bg-green-100 text-green-700 font-black text-base rounded-2xl border-2 border-green-300 transition shadow-sm flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check"></i> True (صح)
+                        </button>
+                        <button onclick="checkAnswerTF(this, '${scope}', ${qIdx}, 'False')" class="px-8 py-2.5 bg-red-50 hover:bg-red-100 text-red-700 font-black text-base rounded-2xl border-2 border-red-300 transition shadow-sm flex items-center gap-2">
+                            <i class="fa-solid fa-circle-xmark"></i> False (خطأ)
+                        </button>
+                    </div>
+                `;
+            } else if (qType === 'reorder') {
+                const words = q.correctSentence.split(' ').sort(() => Math.random() - 0.5);
+                userReorderSelections[`${scope}_${qIdx}`] = [];
+
+                bodyHTML = `
+                    <p class="font-black text-purple-900 text-sm md:text-base">${qIdx + 1}. ${q.q}</p>
+                    <p class="text-xs font-bold text-gray-500">اسحبي الكلمات وضعيها في الصندوق أو اضغطي عليها بالترتيب من اليسار إلى اليمين (Left to Right):</p>
+
+                    <!-- Selected Words Target Box (LTR for English) -->
+                    <div id="reorder-target-${scope}-${qIdx}" 
+                         dir="ltr"
+                         ondragover="event.preventDefault(); this.classList.add('drag-over')" 
+                         ondragleave="this.classList.remove('drag-over')" 
+                         ondrop="handleDropReorder(event, '${scope}', ${qIdx})" 
+                         class="reorder-zone-ltr min-h-[60px] p-3 bg-purple-50 border-2 border-dashed border-pastelPurple-300 rounded-2xl flex flex-wrap gap-2 items-center shadow-inner transition">
+                        <span class="text-xs font-bold text-purple-400 font-fredoka placeholder-msg">Drag words here from left to right... ➔</span>
+                    </div>
+
+                    <!-- Available Word Chips Source (LTR for English) -->
+                    <div id="reorder-source-${scope}-${qIdx}" dir="ltr" class="reorder-zone-ltr flex flex-wrap gap-2 justify-center pt-2">
+                        ${words.map((w, wIdx) => `
+                            <button draggable="true" 
+                                    ondragstart="handleDragStart(event, '${w.replace(/'/g, "\\'")}', '${scope}', ${qIdx})" 
+                                    onclick="clickReorderWord(this, '${scope}', ${qIdx}, '${w.replace(/'/g, "\\'")}')" 
+                                    class="word-chip py-2.5 px-4 bg-pastelPurple-100 hover:bg-pastelPurple-200 text-purple-950 font-black text-base font-fredoka rounded-2xl border-2 border-pastelPurple-300 shadow-sm">
+                                ${w}
+                            </button>
+                        `).join('')}
+                    </div>
+
+                    <div class="flex justify-between items-center pt-2">
+                        <button onclick="resetReorder('${scope}', ${qIdx})" class="text-xs text-gray-500 hover:text-purple-700 font-bold underline flex items-center gap-1">
+                            <i class="fa-solid fa-rotate-left"></i> إعادة محاولة
+                        </button>
+                        <button onclick="checkAnswerReorder(this, '${scope}', ${qIdx}, '${q.correctSentence.replace(/'/g, "\\'")}')" class="px-5 py-2 bg-pastelPurple-500 hover:bg-pastelPurple-600 text-white font-bold text-xs rounded-xl shadow transition">
+                            تحقق من الترتيب ✨
+                        </button>
+                    </div>
+                `;
+            } else if (qType === 'missing') {
+                const wordWithBlank = q.word.replace(new RegExp(q.letter, 'i'), '_');
+                bodyHTML = `
+                    <p class="font-black text-purple-900 text-sm md:text-base">${qIdx + 1}. ${q.q}</p>
+                    
+                    <div class="text-center my-3">
+                        <span class="text-3xl font-black font-fredoka tracking-widest text-purple-900 bg-purple-50 px-6 py-2 rounded-2xl border-2 border-pastelPurple-200 inline-block">
+                            ${wordWithBlank}
+                        </span>
+                    </div>
+
+                    <div class="flex gap-3 justify-center items-center">
+                        <span class="text-xs font-bold text-gray-500">اختر الحرف المناسب:</span>
+                        ${q.letterOpts.map(letOpt => `
+                            <button onclick="checkAnswerMissing(this, '${scope}', ${qIdx}, '${letOpt}', '${q.letter}')" class="w-12 h-12 bg-white hover:bg-pastelPink-100 text-purple-950 font-black text-xl rounded-2xl border-2 border-pastelPink-300 shadow-sm transition transform hover:scale-110 flex items-center justify-center font-fredoka">
+                                ${letOpt}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            wrapper.innerHTML = bodyHTML + `<div class="q-feedback hidden text-center font-black text-xs md:text-sm py-2 rounded-xl mt-2"></div>`;
+            return wrapper;
+        }
+
+        // ================= Question Verification & Drag Logic =================
+        let draggedWordInfo = null;
+
+        function handleDragStart(event, word, scope, qIdx) {
+            draggedWordInfo = { word, scope, qIdx };
+            event.dataTransfer.setData("text/plain", word);
+        }
+
+        function handleDropReorder(event, scope, qIdx) {
+            event.preventDefault();
+            const targetContainer = document.getElementById(`reorder-target-${scope}-${qIdx}`);
+            targetContainer.classList.remove('drag-over');
+
+            if (!draggedWordInfo || draggedWordInfo.scope !== scope || draggedWordInfo.qIdx !== qIdx) return;
+
+            const word = draggedWordInfo.word;
+            const key = `${scope}_${qIdx}`;
+
+            // Add to User Selections LTR
+            userReorderSelections[key].push(word);
+
+            // Hide placeholder text
+            const placeholder = targetContainer.querySelector('.placeholder-msg');
+            if (placeholder) placeholder.style.display = 'none';
+
+            // Create LTR Chip inside target
+            const chip = document.createElement('span');
+            chip.className = "px-3 py-1.5 bg-pastelPurple-500 text-white font-black font-fredoka text-sm rounded-xl shadow-sm flex items-center gap-1 animate-bounce-once";
+            chip.innerText = word;
+            targetContainer.appendChild(chip);
+
+            // Disable original chip in source
+            const sourceBtns = document.querySelectorAll(`#reorder-source-${scope}-${qIdx} button`);
+            for (let btn of sourceBtns) {
+                if (btn.innerText.trim() === word && !btn.classList.contains('opacity-40')) {
+                    btn.classList.add('opacity-40', 'pointer-events-none');
+                    break;
+                }
+            }
+
+            draggedWordInfo = null;
+        }
+
+        function checkAnswerMCQ(btn, scope, qIdx, selectedOpt) {
+            const questions = scope === 'grammar' ? grammarData[currentGrammarIndex].questions : drillsData[currentDrillUnit];
+            const correctOpt = questions[qIdx].ans;
+            const parent = btn.parentElement;
+            const feedback = parent.parentElement.querySelector('.q-feedback');
+
+            Array.from(parent.children).forEach(c => {
+                c.className = "py-2.5 px-3 bg-purple-50 text-purple-900 font-bold text-sm rounded-xl border border-purple-200 shadow-sm";
+            });
+
+            feedback.classList.remove('hidden', 'bg-green-100', 'text-green-900', 'bg-red-100', 'text-red-900');
+
+            if (selectedOpt === correctOpt) {
+                btn.className = "py-2.5 px-3 bg-pastelGreen-400 text-purple-950 font-black text-sm rounded-xl border-2 border-green-600 shadow-md transform scale-102";
+                feedback.classList.add('bg-green-100', 'text-green-900');
+                feedback.innerHTML = `🌟 أحسنتِ يا بطلة! إجابة صحيحة! (Great Job!)`;
+                confetti({ particleCount: 35, spread: 60, origin: { y: 0.7 } });
+            } else {
+                btn.className = "py-2.5 px-3 bg-red-200 text-red-900 font-bold text-sm rounded-xl border-2 border-red-400";
+                feedback.classList.add('bg-red-100', 'text-red-900');
+                feedback.innerHTML = `❌ إجابة خاطئة، حاولي مرة أخرى يا شاطرة! (Try again!)`;
+            }
+        }
+
+        function checkAnswerTF(btn, scope, qIdx, selectedTF) {
+            const questions = scope === 'grammar' ? grammarData[currentGrammarIndex].questions : drillsData[currentDrillUnit];
+            const correctTF = questions[qIdx].correctTF;
+            const parent = btn.parentElement;
+            const feedback = parent.parentElement.querySelector('.q-feedback');
+
+            Array.from(parent.children).forEach(c => {
+                c.className = c.className.replace(/bg-green-400|bg-red-400/, '');
+            });
+
+            feedback.classList.remove('hidden', 'bg-green-100', 'text-green-900', 'bg-red-100', 'text-red-900');
+
+            if (selectedTF === correctTF) {
+                btn.classList.add('bg-green-400', 'text-purple-950');
+                feedback.classList.add('bg-green-100', 'text-green-900');
+                feedback.innerHTML = `🌟 إجابة صحيحة وزكية جداً! (Correct!)`;
+                confetti({ particleCount: 35, spread: 60, origin: { y: 0.7 } });
+            } else {
+                btn.classList.add('bg-red-400', 'text-white');
+                feedback.classList.add('bg-red-100', 'text-red-900');
+                feedback.innerHTML = `❌ إجابة غير صحيحة، حاول مجدداً! (Incorrect!)`;
+            }
+        }
+
+        function clickReorderWord(btn, scope, qIdx, word) {
+            const key = `${scope}_${qIdx}`;
+            userReorderSelections[key].push(word);
+            
+            const targetContainer = document.getElementById(`reorder-target-${scope}-${qIdx}`);
+            btn.classList.add('opacity-40', 'pointer-events-none');
+
+            // Hide placeholder message
+            const placeholder = targetContainer.querySelector('.placeholder-msg');
+            if (placeholder) placeholder.style.display = 'none';
+
+            // Render chip in target box (LTR)
+            const chip = document.createElement('span');
+            chip.className = "px-3 py-1.5 bg-pastelPurple-500 text-white font-black font-fredoka text-sm rounded-xl shadow-sm";
+            chip.innerText = word;
+            targetContainer.appendChild(chip);
+        }
+
+        function resetReorder(scope, qIdx) {
+            const key = `${scope}_${qIdx}`;
+            userReorderSelections[key] = [];
+            const targetContainer = document.getElementById(`reorder-target-${scope}-${qIdx}`);
+            targetContainer.innerHTML = '<span class="text-xs font-bold text-purple-400 font-fredoka placeholder-msg">Drag words here from left to right... ➔</span>';
+            
+            const sourceContainer = document.getElementById(`reorder-source-${scope}-${qIdx}`);
+            Array.from(sourceContainer.children).forEach(child => {
+                child.classList.remove('opacity-40', 'pointer-events-none');
+            });
+        }
+
+        function checkAnswerReorder(btn, scope, qIdx, correctSentence) {
+            const key = `${scope}_${qIdx}`;
+            const userSentence = (userReorderSelections[key] || []).join(' ');
+            const feedback = btn.parentElement.parentElement.querySelector('.q-feedback');
+
+            feedback.classList.remove('hidden', 'bg-green-100', 'text-green-900', 'bg-red-100', 'text-red-900');
+
+            if (userSentence.trim().toLowerCase() === correctSentence.trim().toLowerCase()) {
+                feedback.classList.add('bg-green-100', 'text-green-900');
+                feedback.innerHTML = `🎉 رائع جدًا! ترتيبك صحيح كلياً من اليسار إلى اليمين! (Excellent Reorder!)`;
+                confetti({ particleCount: 45, spread: 70, origin: { y: 0.7 } });
+            } else {
+                feedback.classList.add('bg-red-100', 'text-red-900');
+                feedback.innerHTML = `❌ الترتيب غير صحيح، حاولي مجدداً!`;
+            }
+        }
+
+        function checkAnswerMissing(btn, scope, qIdx, selectedLetter, correctLetter) {
+            const parent = btn.parentElement;
+            const feedback = parent.parentElement.querySelector('.q-feedback');
+
+            feedback.classList.remove('hidden', 'bg-green-100', 'text-green-900', 'bg-red-100', 'text-red-900');
+
+            if (selectedLetter.toLowerCase() === correctLetter.toLowerCase()) {
+                btn.className = "w-12 h-12 bg-pastelGreen-400 text-purple-950 font-black text-xl rounded-2xl border-2 border-green-600 shadow-md transition flex items-center justify-center font-fredoka";
+                feedback.classList.add('bg-green-100', 'text-green-900');
+                feedback.innerHTML = `✨ بطلة! الحرف الصحيح هو (${correctLetter})`;
+                confetti({ particleCount: 35, spread: 60, origin: { y: 0.7 } });
+            } else {
+                btn.className = "w-12 h-12 bg-red-200 text-red-900 font-black text-xl rounded-2xl border-2 border-red-400 shadow-sm transition flex items-center justify-center font-fredoka";
+                feedback.classList.add('bg-red-100', 'text-red-900');
+                feedback.innerHTML = `❌ حرف غير صحيح، جربي حرفاً آخر!`;
+            }
+        }
+
+        // ================= Grammar Render Logic =================
+        function renderGrammarPage() {
+            const rule = grammarData[currentGrammarIndex];
+            document.getElementById('grammar-badge').innerText = `القاعدة رقم ${currentGrammarIndex + 1}`;
+            document.getElementById('grammar-title').innerText = rule.title;
+            document.getElementById('grammar-desc').innerText = rule.desc;
+            document.getElementById('grammar-page-indicator').innerText = `قاعدة ${currentGrammarIndex + 1} من ${grammarData.length}`;
+
+            // Render Media
+            const mediaContainer = document.getElementById('grammar-media-container');
+            if (rule.mediaType === 'video' && rule.mediaUrl) {
+                mediaContainer.innerHTML = `<iframe class="w-full h-64 rounded-2xl" src="${rule.mediaUrl}" title="YouTube video player" frameborder="0" allowfullscreen></iframe>`;
+            } else {
+                mediaContainer.innerHTML = `<img src="${rule.mediaUrl}" alt="Grammar Illustration" class="max-h-72 w-full object-cover rounded-2xl shadow">`;
+            }
+
+            // Render Universal Questions
+            const qList = document.getElementById('grammar-questions-list');
+            qList.innerHTML = '';
+            rule.questions.forEach((q, qIdx) => {
+                const qElem = createQuestionElement(q, qIdx, 'grammar');
+                qList.appendChild(qElem);
+            });
+
+            // Button States
+            document.getElementById('btn-prev-grammar').disabled = currentGrammarIndex === 0;
+            document.getElementById('btn-next-grammar').disabled = currentGrammarIndex === grammarData.length - 1;
+        }
+
+        function nextGrammar() {
+            if (currentGrammarIndex < grammarData.length - 1) {
+                currentGrammarIndex++;
+                renderGrammarPage();
+            }
+        }
+
+        function prevGrammar() {
+            if (currentGrammarIndex > 0) {
+                currentGrammarIndex--;
+                renderGrammarPage();
+            }
+        }
+
+        // ================= Drills Logic =================
+        function renderDrillTabs() {
+            ['welcome', 'u1', 'u2', 'u3', 'u4'].forEach(unit => {
+                const btn = document.getElementById(`tab-${unit}`);
+                if (unit === currentDrillUnit) {
+                    btn.className = "unit-tab px-5 py-3 rounded-2xl font-black text-sm md:text-base bg-pastelPink-500 text-white shadow-lg border-2 border-pink-300 scale-105 transition";
+                } else {
+                    btn.className = "unit-tab px-5 py-3 rounded-2xl font-black text-sm md:text-base bg-white text-purple-900 shadow hover:bg-pink-100 transition border-2 border-pink-100";
+                }
+            });
+        }
+
+        function loadUnitDrills(unitKey) {
+            currentDrillUnit = unitKey;
+            renderDrillTabs();
+
+            // Dynamic Encouragement Message
+            const randomMsg = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+            document.getElementById('motto-ar').innerText = randomMsg.ar;
+            document.getElementById('motto-en').innerText = randomMsg.en;
+
+            const container = document.getElementById('drills-questions-container');
+            container.innerHTML = '';
+
+            const questions = drillsData[unitKey] || [];
+            if (questions.length === 0) {
+                container.innerHTML = `<div class="text-center p-8 bg-white rounded-3xl text-gray-500 font-bold">لا توجد أسئلة مضافة في هذه الوحدة بعد!</div>`;
+                return;
+            }
+
+            questions.forEach((q, idx) => {
+                const qElem = createQuestionElement(q, idx, 'drills');
+                container.appendChild(qElem);
+            });
+        }
+
+        // ================= Teacher Dashboard & Verification =================
+        function openTeacherAuth() {
+            document.getElementById('teacher-auth-modal').classList.remove('hidden');
+            document.getElementById('teacher-pin').value = '';
+            document.getElementById('pin-error').classList.add('hidden');
+        }
+
+        function closeTeacherAuth() {
+            document.getElementById('teacher-auth-modal').classList.add('hidden');
+        }
+
+        function verifyTeacherPin() {
+            const pin = document.getElementById('teacher-pin').value;
+            if (pin === '121300') {
+                closeTeacherAuth();
+                showSection('teacher-dashboard');
+                switchTeacherTab('dash-vocab');
+            } else {
+                document.getElementById('pin-error').classList.remove('hidden');
+            }
+        }
+
+        function switchTeacherTab(tabId) {
+            document.querySelectorAll('.dash-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.dash-tab').forEach(el => {
+                el.className = "dash-tab flex-1 py-2.5 px-4 rounded-xl font-bold text-sm whitespace-nowrap transition bg-gray-100 text-gray-600";
+            });
+
+            document.getElementById(tabId).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).className = "dash-tab flex-1 py-2.5 px-4 rounded-xl font-bold text-sm whitespace-nowrap transition bg-pastelPurple-500 text-white shadow";
+
+            if (tabId === 'dash-vocab') renderVocabManager();
+            if (tabId === 'dash-grammar') renderGrammarManager();
+            if (tabId === 'dash-drills') renderDrillManager();
+        }
+
+        // --- Teacher Vocab Management ---
+        function renderVocabManager() {
+            const list = document.getElementById('vocab-manager-list');
+            list.innerHTML = '';
+            vocabData.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-200 text-sm";
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <img src="${item.img}" class="w-10 h-10 object-cover rounded-lg">
+                        <div>
+                            <span class="font-bold text-purple-900">${item.word}</span> - <span class="text-gray-600">${item.arabic}</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="editVocab(${index})" class="px-3 py-1 bg-pastelPurple-200 text-pastelPurple-700 font-bold rounded-lg text-xs">تعديل</button>
+                        <button onclick="deleteVocab(${index})" class="px-3 py-1 bg-red-100 text-red-600 font-bold rounded-lg text-xs">حذف</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function saveVocab(e) {
+            e.preventDefault();
+            const id = document.getElementById('vocab-id').value;
+            const word = document.getElementById('vocab-input-word').value;
+            const arabic = document.getElementById('vocab-input-arabic').value;
+            let img = document.getElementById('vocab-input-img').value;
+            const example = document.getElementById('vocab-input-example').value;
+
+            if (!img) {
+                img = "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=400&q=80";
+            }
+
+            if (id) {
+                const idx = vocabData.findIndex(v => v.id == id);
+                vocabData[idx] = { id: Number(id), word, arabic, img, example };
+            } else {
+                vocabData.push({ id: Date.now(), word, arabic, img, example });
+            }
+
+            try {
+                localStorage.setItem('topgoal_vocab', JSON.stringify(vocabData));
+            } catch (err) {
+                console.warn("Storage full, item kept in session memory.");
+            }
+
+            resetVocabForm();
+            renderVocabManager();
+            renderVocabCard();
+        }
+
+        function editVocab(index) {
+            const item = vocabData[index];
+            document.getElementById('vocab-id').value = item.id;
+            document.getElementById('vocab-input-word').value = item.word;
+            document.getElementById('vocab-input-arabic').value = item.arabic;
+            document.getElementById('vocab-input-img').value = item.img;
+            document.getElementById('vocab-input-example').value = item.example;
+            if (item.img) {
+                document.getElementById('img-preview').src = item.img;
+                document.getElementById('img-preview-box').classList.remove('hidden');
+            }
+        }
+
+        function deleteVocab(index) {
+            vocabData.splice(index, 1);
+            localStorage.setItem('topgoal_vocab', JSON.stringify(vocabData));
+            renderVocabManager();
+            renderVocabCard();
+        }
+
+        function resetVocabForm() {
+            document.getElementById('vocab-form').reset();
+            document.getElementById('vocab-id').value = '';
+            document.getElementById('vocab-input-img').value = '';
+            document.getElementById('img-preview-box').classList.add('hidden');
+        }
+
+        // --- Teacher Grammar Management ---
+        let selectedGrammarEditIndex = 0;
+
+        function renderGrammarManager() {
+            const buttonsContainer = document.getElementById('grammar-select-buttons');
+            buttonsContainer.innerHTML = '';
+
+            grammarData.forEach((g, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap ${idx === selectedGrammarEditIndex ? 'bg-pastelGreen-500 text-purple-950 shadow font-black' : 'bg-gray-100 text-gray-700'}`;
+                btn.innerText = `القاعدة ${idx + 1}`;
+                btn.onclick = () => { selectedGrammarEditIndex = idx; renderGrammarManager(); };
+                buttonsContainer.appendChild(btn);
+            });
+
+            const rule = grammarData[selectedGrammarEditIndex];
+            document.getElementById('grammar-edit-index').value = selectedGrammarEditIndex;
+            document.getElementById('grammar-input-title').value = rule.title;
+            document.getElementById('grammar-input-desc').value = rule.desc;
+            document.getElementById('grammar-input-type').value = rule.mediaType || 'image';
+            document.getElementById('grammar-input-media').value = rule.mediaUrl;
+            document.getElementById('grammar-input-media-url-fallback').value = rule.mediaUrl.startsWith('data:') ? '' : rule.mediaUrl;
+
+            if (rule.mediaUrl) {
+                document.getElementById('grammar-media-preview-box').classList.remove('hidden');
+            } else {
+                document.getElementById('grammar-media-preview-box').classList.add('hidden');
+            }
+
+            // Questions List with Full Editable Inputs
+            renderGrammarQuestionsEditor(rule.questions);
+        }
+
+        function renderGrammarQuestionsEditor(questions) {
+            const qContainer = document.getElementById('grammar-questions-manager');
+            qContainer.innerHTML = '';
+
+            questions.forEach((q, qIdx) => {
+                const qType = q.type || 'mcq';
+                const card = document.createElement('div');
+                card.className = "p-4 bg-purple-50/60 border-2 border-pastelGreen-200 rounded-2xl space-y-3 text-xs";
+                
+                let fieldsHTML = `
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <span class="font-extrabold text-purple-900 text-sm">سؤال ${qIdx + 1}</span>
+                        <button type="button" onclick="removeGrammarQuestionField(${qIdx})" class="px-2 py-1 bg-red-100 text-red-600 font-bold rounded-lg hover:bg-red-200">
+                            <i class="fa-solid fa-trash"></i> حذف
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">نوع السؤال</label>
+                            <select onchange="updateGrammarQType(${qIdx}, this.value)" class="w-full p-2 border rounded-xl font-bold bg-white">
+                                <option value="mcq" ${qType === 'mcq' ? 'selected' : ''}>اختيار من متعدد</option>
+                                <option value="tf" ${qType === 'tf' ? 'selected' : ''}>صح أو خطأ (T or F)</option>
+                                <option value="reorder" ${qType === 'reorder' ? 'selected' : ''}>ترتيب الجملة</option>
+                                <option value="missing" ${qType === 'missing' ? 'selected' : ''}>إكمال الحرف الناقص</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">نص السؤال</label>
+                            <input type="text" value="${q.q || ''}" onchange="updateGrammarQText(${qIdx}, this.value)" placeholder="مثال: Choose the correct word" class="w-full p-2 border rounded-xl font-bold bg-white">
+                        </div>
+                    </div>
+                `;
+
+                if (qType === 'mcq') {
+                    const opts = q.opts || ["", "", ""];
+                    fieldsHTML += `
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <div>
+                                <label class="block font-bold text-gray-700 mb-1">الخيار 1</label>
+                                <input type="text" value="${opts[0] || ''}" onchange="updateGrammarMCQOpt(${qIdx}, 0, this.value)" class="w-full p-2 border rounded-xl font-bold bg-white">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-gray-700 mb-1">الخيار 2</label>
+                                <input type="text" value="${opts[1] || ''}" onchange="updateGrammarMCQOpt(${qIdx}, 1, this.value)" class="w-full p-2 border rounded-xl font-bold bg-white">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-gray-700 mb-1">الخيار 3</label>
+                                <input type="text" value="${opts[2] || ''}" onchange="updateGrammarMCQOpt(${qIdx}, 2, this.value)" class="w-full p-2 border rounded-xl font-bold bg-white">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">الخيار الصحيح</label>
+                            <select onchange="updateGrammarMCQAns(${qIdx}, this.value)" class="w-full p-2 border rounded-xl font-extrabold text-green-700 bg-white">
+                                <option value="0" ${q.ans === 0 ? 'selected' : ''}>الخيار 1</option>
+                                <option value="1" ${q.ans === 1 ? 'selected' : ''}>الخيار 2</option>
+                                <option value="2" ${q.ans === 2 ? 'selected' : ''}>الخيار 3</option>
+                            </select>
+                        </div>
+                    `;
+                } else if (qType === 'tf') {
+                    fieldsHTML += `
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">الإجابة الصحيحة</label>
+                            <select onchange="updateGrammarTFAns(${qIdx}, this.value)" class="w-full p-2 border rounded-xl font-extrabold text-green-700 bg-white">
+                                <option value="True" ${q.correctTF === 'True' ? 'selected' : ''}>True (صح)</option>
+                                <option value="False" ${q.correctTF === 'False' ? 'selected' : ''}>False (خطأ)</option>
+                            </select>
+                        </div>
+                    `;
+                } else if (qType === 'reorder') {
+                    fieldsHTML += `
+                        <div>
+                            <label class="block font-bold text-gray-700 mb-1">الجملة بالترتيب الصحيح (مفصولة بمسافات)</label>
+                            <input type="text" value="${q.correctSentence || ''}" onchange="updateGrammarReorderSentence(${qIdx}, this.value)" placeholder="She is a clever girl" class="w-full p-2 border rounded-xl font-bold bg-white">
+                        </div>
+                    `;
+                } else if (qType === 'missing') {
+                    const letterOptsStr = (q.letterOpts || []).join(', ');
+                    fieldsHTML += `
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            <div>
+                                <label class="block font-bold text-gray-700 mb-1">الكلمة كاملة</label>
+                                <input type="text" value="${q.word || ''}" onchange="updateGrammarMissingWord(${qIdx}, this.value)" placeholder="School" class="w-full p-2 border rounded-xl font-bold bg-white">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-gray-700 mb-1">الحرف الناقص</label>
+                                <input type="text" value="${q.letter || ''}" onchange="updateGrammarMissingLetter(${qIdx}, this.value)" maxlength="1" placeholder="c" class="w-full p-2 border rounded-xl font-bold bg-white">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-gray-700 mb-1">الخيارات (مفصولة بفاصلة)</label>
+                                <input type="text" value="${letterOptsStr}" onchange="updateGrammarMissingOpts(${qIdx}, this.value)" placeholder="c, k, s" class="w-full p-2 border rounded-xl font-bold bg-white">
+                            </div>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = fieldsHTML;
+                qContainer.appendChild(card);
+            });
+        }
+
+        // Live Modifiers for Grammar Questions Form
+        function updateGrammarQType(qIdx, newType) {
+            let q = grammarData[selectedGrammarEditIndex].questions[qIdx];
+            q.type = newType;
+            if (newType === 'mcq') { q.opts = ["", "", ""]; q.ans = 0; }
+            if (newType === 'tf') { q.correctTF = 'True'; }
+            if (newType === 'reorder') { q.correctSentence = ''; }
+            if (newType === 'missing') { q.word = ''; q.letter = ''; q.letterOpts = []; }
+            renderGrammarQuestionsEditor(grammarData[selectedGrammarEditIndex].questions);
+        }
+
+        function updateGrammarQText(qIdx, text) { grammarData[selectedGrammarEditIndex].questions[qIdx].q = text; }
+        function updateGrammarMCQOpt(qIdx, optIdx, val) { grammarData[selectedGrammarEditIndex].questions[qIdx].opts[optIdx] = val; }
+        function updateGrammarMCQAns(qIdx, val) { grammarData[selectedGrammarEditIndex].questions[qIdx].ans = parseInt(val); }
+        function updateGrammarTFAns(qIdx, val) { grammarData[selectedGrammarEditIndex].questions[qIdx].correctTF = val; }
+        function updateGrammarReorderSentence(qIdx, val) { grammarData[selectedGrammarEditIndex].questions[qIdx].correctSentence = val; }
+        function updateGrammarMissingWord(qIdx, val) { grammarData[selectedGrammarEditIndex].questions[qIdx].word = val; }
+        function updateGrammarMissingLetter(qIdx, val) { grammarData[selectedGrammarEditIndex].questions[qIdx].letter = val; }
+        function updateGrammarMissingOpts(qIdx, val) { grammarData[selectedGrammarEditIndex].questions[qIdx].letterOpts = val.split(',').map(s => s.trim()); }
+
+        function addGrammarQuestionField() {
+            if (grammarData[selectedGrammarEditIndex].questions.length >= 6) {
+                alert("الحد الأقصى لكل قاعدة هو 6 أسئلة تطبيقيّة.");
+                return;
+            }
+            grammarData[selectedGrammarEditIndex].questions.push({ type: 'mcq', q: "", opts: ["", "", ""], ans: 0 });
+            renderGrammarQuestionsEditor(grammarData[selectedGrammarEditIndex].questions);
+        }
+
+        function removeGrammarQuestionField(qIdx) {
+            grammarData[selectedGrammarEditIndex].questions.splice(qIdx, 1);
+            renderGrammarQuestionsEditor(grammarData[selectedGrammarEditIndex].questions);
+        }
+
+        function saveGrammar(e) {
+            e.preventDefault();
+            const idx = selectedGrammarEditIndex;
+            const title = document.getElementById('grammar-input-title').value;
+            const desc = document.getElementById('grammar-input-desc').value;
+            const mediaType = document.getElementById('grammar-input-type').value;
+            let mediaUrl = document.getElementById('grammar-input-media').value;
+            const fallbackUrl = document.getElementById('grammar-input-media-url-fallback').value;
+
+            if (fallbackUrl && !mediaUrl.startsWith('data:')) {
+                mediaUrl = fallbackUrl;
+            }
+
+            grammarData[idx].title = title;
+            grammarData[idx].desc = desc;
+            grammarData[idx].mediaType = mediaType;
+            grammarData[idx].mediaUrl = mediaUrl;
+
+            try {
+                localStorage.setItem('topgoal_grammar', JSON.stringify(grammarData));
+            } catch (err) {
+                console.warn("Storage full, kept in session memory.");
+            }
+
+            alert("تم حفظ القاعدة والأسئلة بنجاح!");
+            renderGrammarPage();
+        }
+
+        // --- Teacher Drills Management ---
+        function toggleDrillTypeFields() {
+            const type = document.getElementById('drill-type-select').value;
+            document.getElementById('field-group-mcq').classList.toggle('hidden', type !== 'mcq');
+            document.getElementById('field-group-correct-mcq').classList.toggle('hidden', type !== 'mcq');
+            document.getElementById('field-group-tf').classList.toggle('hidden', type !== 'tf');
+            document.getElementById('field-group-reorder').classList.toggle('hidden', type !== 'reorder');
+            document.getElementById('field-group-missing').classList.toggle('hidden', type !== 'missing');
+        }
+
+        function renderDrillManager() {
+            const selectedUnit = document.getElementById('drill-unit-select').value;
+            const list = document.getElementById('drills-manager-list');
+            list.innerHTML = '';
+
+            const questions = drillsData[selectedUnit] || [];
+            questions.forEach((q, idx) => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-gray-50 p-3 rounded-xl border text-xs";
+                div.innerHTML = `
+                    <div>
+                        <p class="font-bold text-purple-900">${idx + 1}. [${q.type || 'mcq'}] ${q.q}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="deleteDrill('${selectedUnit}', ${idx})" class="px-3 py-1 bg-red-100 text-red-600 font-bold rounded-lg">حذف</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function saveDrillQuestion(e) {
+            e.preventDefault();
+            const unit = document.getElementById('drill-unit-select').value;
+            const type = document.getElementById('drill-type-select').value;
+            const q = document.getElementById('drill-input-q').value;
+
+            if (!drillsData[unit]) drillsData[unit] = [];
+
+            let newQuestion = { id: Date.now(), type, q };
+
+            if (type === 'mcq') {
+                const opt1 = document.getElementById('drill-input-opt1').value;
+                const opt2 = document.getElementById('drill-input-opt2').value;
+                const opt3 = document.getElementById('drill-input-opt3').value;
+                const ans = parseInt(document.getElementById('drill-input-correct').value);
+                newQuestion.opts = [opt1, opt2, opt3];
+                newQuestion.ans = ans;
+            } else if (type === 'tf') {
+                newQuestion.correctTF = document.getElementById('drill-input-tf-correct').value;
+            } else if (type === 'reorder') {
+                newQuestion.correctSentence = document.getElementById('drill-input-reorder-correct').value;
+            } else if (type === 'missing') {
+                newQuestion.word = document.getElementById('drill-input-missing-word').value;
+                newQuestion.letter = document.getElementById('drill-input-missing-letter').value;
+                newQuestion.letterOpts = document.getElementById('drill-input-missing-opts').value.split(',').map(s => s.trim());
+            }
+
+            drillsData[unit].push(newQuestion);
+            localStorage.setItem('topgoal_drills', JSON.stringify(drillsData));
+            resetDrillForm();
+            renderDrillManager();
+            loadUnitDrills(unit);
+        }
+
+        function deleteDrill(unit, index) {
+            drillsData[unit].splice(index, 1);
+            localStorage.setItem('topgoal_drills', JSON.stringify(drillsData));
+            renderDrillManager();
+            loadUnitDrills(unit);
+        }
+
+        function resetDrillForm() {
+            document.getElementById('drill-form').reset();
+            document.getElementById('drill-edit-id').value = '';
+            toggleDrillTypeFields();
+        }
+    </script>
+</body>
+</html>
